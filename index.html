@@ -3,89 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATTER // PRO</title>
+    <title>MATTER // BETA</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <svg style="display: none;">
-        <defs>
-            <filter id="pixelate" x="0" y="0">
-                <feFlood x="2" y="2" height="2" width="2"/>
-                <feComposite width="10" height="10"/>
-                <feTile result="a"/>
-                <feComposite in="SourceGraphic" in2="a" operator="in"/>
-                <feMorphology operator="dilate" radius="5"/>
-            </filter>
-        </defs>
-    </svg>
-
     <div id="auth-screen">
         <div class="auth-box">
-            <h1>MATTER</h1>
-            <p>SYSTEM ACCESS REQUIRED</p>
+            <h1>MATTER <span class="accent-text">BETA</span></h1>
+            <p>VISUAL SYNTHESIS ENGINE</p>
             <button id="google-login-btn">
                 <span class="iconify" data-icon="ph:google-logo-bold"></span>
-                AUTHENTICATE
+                ENTER SYSTEM
             </button>
         </div>
     </div>
 
-    <div id="app" class="hidden">
+    <div id="dashboard" class="hidden">
+        <header>
+            <div class="brand">MATTER // BETA</div>
+            <div class="header-right">
+                <span id="dash-user-name">User</span>
+                <button id="logout-btn">LOGOUT</button>
+            </div>
+        </header>
+        <div class="dash-content">
+            <div id="new-project-btn" class="project-card new">
+                <span class="iconify" data-icon="ph:plus"></span>
+                NEW COMPOSITION
+            </div>
+            <div class="project-card">Demo Project 1</div>
+            <div class="project-card">Music Video v3</div>
+        </div>
+    </div>
+
+    <div id="editor" class="hidden">
         
         <header>
             <div class="brand">
-                <span class="iconify" data-icon="ph:circles-three-plus-fill"></span>
-                MATTER <span class="badge">PRO</span>
+                <button id="back-to-dash-btn" class="icon-only"><span class="iconify" data-icon="ph:arrow-left-bold"></span></button>
+                MATTER // BETA
             </div>
             <div class="header-center">
                 <span id="project-name">Untitled Composition</span>
             </div>
             <div class="header-right">
-                <div class="user-pill">
-                    <img id="user-pfp" src="" alt="">
-                    <span id="user-name">Guest</span>
-                </div>
-                <button id="logout-btn" class="icon-only"><span class="iconify" data-icon="ph:sign-out"></span></button>
+                 <button id="save-btn" class="accent-btn"><span class="iconify" data-icon="ph:floppy-disk-fill"></span> SAVE</button>
             </div>
         </header>
 
         <main>
             <section class="panel left">
-                <div class="tabs">
-                    <button class="tab active" data-tab="files">FILES</button>
-                    <button class="tab" data-tab="stock">PIXABAY</button>
+                <div class="panel-header">ASSETS</div>
+                <div id="drop-zone">
+                    <span class="iconify" data-icon="ph:plus-circle" style="font-size: 32px;"></span>
+                    <p>Import Media</p>
+                    <input type="file" id="file-upload" multiple hidden>
                 </div>
-
-                <div id="tab-files" class="tab-content active">
-                    <div id="drop-zone">
-                        <span class="iconify" data-icon="ph:plus-circle" style="font-size: 32px;"></span>
-                        <p>Import Media</p>
-                        <input type="file" id="file-upload" multiple hidden>
-                    </div>
-                    <div class="file-list-help">Supported: IMG, MP4</div>
-                </div>
-
-                <div id="tab-stock" class="tab-content no-pad">
-                    <div class="iframe-container">
-                        <div class="iframe-overlay-hint">Right Click Image -> Copy Image Address -> Paste in URL Box</div>
-                        <iframe src="https://pixabay.com/" title="Pixabay Stock"></iframe>
-                    </div>
-                    <div class="url-importer">
-                        <input type="text" id="url-input" placeholder="Paste Image Address...">
-                        <button id="url-add-btn"><span class="iconify" data-icon="ph:download-simple"></span></button>
-                    </div>
-                </div>
+                <div class="file-list-help">Supported: IMG, MP4</div>
             </section>
 
             <section class="center-stage">
-                <div class="viewport-controls">
-                    <span class="res-tag">1920x1080</span>
-                    <button id="save-btn" class="accent-text"><span class="iconify" data-icon="ph:floppy-disk-fill"></span> SAVE</button>
-                </div>
-                
                 <div id="canvas-wrapper">
                     <div id="canvas-stage">
                         </div>
@@ -97,7 +77,9 @@
                         <button id="stop-btn"><span class="iconify" data-icon="ph:stop-fill"></span></button>
                         <span id="time-display">00:00:00</span>
                     </div>
-                    <input type="range" id="scrubber" min="0" max="100" value="0">
+                    <div class="timeline-track-container">
+                        <input type="range" id="scrubber" min="0" max="100" value="0">
+                        <div class="track-visuals"></div> </div>
                 </div>
             </section>
 
@@ -111,43 +93,60 @@
                 <template id="layer-props-template">
                     
                     <div class="prop-section">
-                        <label>TRANSITIONS</label>
+                        <label>TOOLS</label>
                         <div class="btn-grid">
-                            <button class="action-btn" data-action="fade-in">Fade In</button>
-                            <button class="action-btn" data-action="fade-out">Fade Out</button>
+                            <button class="action-btn" data-action="split">
+                                <span class="iconify" data-icon="ph:scissors"></span> Split
+                            </button>
+                            <button class="action-btn danger" data-action="delete">
+                                <span class="iconify" data-icon="ph:trash"></span> Delete
+                            </button>
                         </div>
                     </div>
 
                     <div class="prop-section">
-                        <label>SPLICING</label>
-                        <div class="btn-grid">
-                            <button class="action-btn" data-action="split">
-                                <span class="iconify" data-icon="ph:scissors"></span> Split Clip
-                            </button>
+                         <label>TRANSFORM</label>
+                        <div class="input-group-row">
+                             <div>
+                                <label class="sub-label">W</label>
+                                <input type="number" class="prop-num-input" data-prop="width">
+                             </div>
+                             <div>
+                                <label class="sub-label">H</label>
+                                <input type="number" class="prop-num-input" data-prop="height">
+                             </div>
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-label"><span>SCALE</span> <span class="val-display">1.0</span></div>
+                            <input type="range" class="prop-slider" data-prop="scale" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>OPACITY</span> <span class="val-display">100%</span></div>
+                            <input type="range" class="prop-slider" data-prop="opacity" min="0" max="100" value="100">
                         </div>
                     </div>
 
                     <div class="prop-section">
                         <label>EFFECTS</label>
                         <div class="slider-group">
-                            <div class="slider-label"><span>BLUR</span> <span class="val-display" id="val-blur">0px</span></div>
-                            <input type="range" class="prop-slider" data-prop="blur" min="0" max="20" step="1" value="0">
+                            <div class="slider-label"><span>BLUR</span> <span class="val-display">0px</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="blur" min="0" max="20" step="1" value="0">
                         </div>
                         <div class="slider-group">
-                            <div class="slider-label"><span>PIXELATE</span> <span class="val-display" id="val-pixel">0%</span></div>
-                            <input type="range" class="prop-slider" data-prop="pixelate" min="0" max="10" step="1" value="0">
-                        </div>
-                    </div>
-
-                    <div class="prop-section">
-                        <label>TRANSFORM</label>
-                        <div class="slider-group">
-                            <div class="slider-label"><span>OPACITY</span> <span class="val-display" id="val-opacity">100%</span></div>
-                            <input type="range" class="prop-slider" data-prop="opacity" min="0" max="100" value="100">
+                            <div class="slider-label"><span>GRAYSCALE</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="grayscale" min="0" max="100" step="1" value="0">
                         </div>
                         <div class="slider-group">
-                            <div class="slider-label"><span>SCALE</span> <span class="val-display" id="val-scale">1.0</span></div>
-                            <input type="range" class="prop-slider" data-prop="scale" min="0.1" max="3" step="0.1" value="1">
+                            <div class="slider-label"><span>SEPIA</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="sepia" min="0" max="100" step="1" value="0">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>INVERT</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="invert" min="0" max="100" step="1" value="0">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>CONTRAST</span> <span class="val-display">100%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="contrast" min="0" max="200" step="1" value="100">
                         </div>
                     </div>
                 </template>
