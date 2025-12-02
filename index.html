@@ -3,75 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XRNO // EDIT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Matter // Visual Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="auth-screen">
-        <div class="auth-box">
-            <h1>XRNO <span class="blink">_</span></h1>
-            <p>VISUAL SYNTHESIS ENGINE // v2.0</p>
+        <div class="space-bg">
+            <div class="shape cube"></div>
+            <div class="shape sphere"></div>
+            <div class="shape pyramid"></div>
+        </div>
+        <div class="auth-box glass">
+            <h1 class="glitch" data-text="MATTER">MATTER</h1>
+            <p>NON-LINEAR EDITING // BROWSER BASED</p>
             <button id="google-login-btn">
-                <span class="iconify" data-icon="ph:google-logo-bold"></span>
-                INITIALIZE SESSION
+                <span class="iconify" data-icon="flat-color-icons:google"></span>
+                ENTER SYSTEM
             </button>
         </div>
     </div>
 
-    <div id="app" class="hidden">
+    <div id="dashboard" class="hidden">
+        <header class="dash-header">
+            <div class="logo">MATTER <span class="beta">BETA</span></div>
+            <div class="user-profile">
+                <img id="dash-pfp" src="" alt="Profile">
+                <span id="dash-name">User</span>
+                <button id="logout-btn-dash" class="text-btn">LOGOUT</button>
+            </div>
+        </header>
         
+        <div class="dash-content">
+            <div class="projects-grid" id="projects-list">
+                <div class="new-project-card" id="new-project-btn">
+                    <span class="iconify" data-icon="ph:plus-light"></span>
+                    <p>NEW COMPOSITION</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editor" class="hidden">
         <header>
-            <div class="brand">XRNO <span id="user-name" class="user-badge">GHOST</span></div>
+            <div class="left-controls">
+                <button id="back-to-dash"><span class="iconify" data-icon="ph:arrow-left"></span></button>
+                <input type="text" id="project-title" value="Untitled Project" class="title-edit">
+            </div>
             <div class="tools">
-                <button id="save-btn"><span class="iconify" data-icon="ph:floppy-disk"></span> SAVE</button>
-                <button id="logout-btn" class="danger">LOGOUT</button>
+                <button id="save-project-btn"><span class="iconify" data-icon="ph:floppy-disk"></span> SAVE</button>
+                <button id="export-btn" class="accent">EXPORT</button>
             </div>
         </header>
 
         <main>
             <section class="panel left">
-                <div class="panel-header">ASSETS // UPLOAD</div>
+                <div class="tabs">
+                    <button class="tab active" data-tab="assets">FILES</button>
+                    <button class="tab" data-tab="stock">STOCK</button>
+                </div>
                 
-                <div id="drop-zone" class="upload-area">
-                    <span class="iconify" data-icon="ph:upload-simple" style="font-size: 24px;"></span>
-                    <p>CLICK TO IMPORT</p>
-                    <input type="file" id="file-upload" hidden>
+                <div id="tab-assets" class="tab-content active">
+                    <div id="drop-zone" class="upload-zone">
+                        <span class="iconify" data-icon="ph:upload-simple"></span>
+                        <small>DROP MEDIA</small>
+                        <input type="file" id="file-upload" multiple hidden>
+                    </div>
                 </div>
 
-                <div class="asset-list">
+                <div id="tab-stock" class="tab-content">
+                    <div class="stock-search">
+                        <input type="text" placeholder="Search Pixabay..." id="stock-search-input">
                     </div>
+                    <div class="stock-grid">
+                        <div class="stock-item" onclick="createLayer('https://cdn.pixabay.com/photo/2023/08/29/19/42/goose-8222013_1280.jpg', 'image')">
+                            <img src="https://cdn.pixabay.com/photo/2023/08/29/19/42/goose-8222013_1280.jpg">
+                        </div>
+                         <div class="stock-item" onclick="createLayer('https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg', 'image')">
+                            <img src="https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg">
+                        </div>
+                    </div>
+                    <small style="color:#444; padding:10px; display:block;">*Pixabay Integration Preview</small>
+                </div>
             </section>
 
             <section class="viewport">
-                <div id="canvas-container">
+                <div id="canvas-wrapper">
                     <div id="canvas-stage"></div>
                 </div>
                 
-                <div class="timeline">
-                    <div class="play-controls">
-                        <span class="iconify" data-icon="ph:play-fill"></span>
-                        <span class="time-code">00:00:00</span>
+                <div class="timeline-panel">
+                    <div class="timeline-tools">
+                        <button id="play-btn"><span class="iconify" data-icon="ph:play-fill"></span></button>
+                        <span id="time-display">00:00:00</span>
+                        <input type="range" id="main-scrubber" value="0" min="0" max="1000">
                     </div>
+                    <div id="timeline-layers">
+                        </div>
                 </div>
             </section>
 
             <section class="panel right">
-                <div class="panel-header">PROPERTIES</div>
-                <div class="prop-group">
-                    <label>OPACITY</label>
-                    <input type="range" class="slider">
+                <div class="panel-header">ATTRIBUTES</div>
+                
+                <div id="active-prop-panel">
+                    <p class="placeholder-text">Select a layer</p>
                 </div>
-                <div class="prop-group">
-                    <label>SCALE</label>
-                    <input type="number" value="100" class="input-field">
-                </div>
-                <div class="prop-group">
-                    <label>BLUR</label>
-                    <input type="range" class="slider">
-                </div>
+
+                <template id="prop-template">
+                    <div class="prop-group">
+                        <label>OPACITY</label>
+                        <input type="range" class="prop-input" data-prop="opacity" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="prop-group">
+                        <label>BLUR (PX)</label>
+                        <input type="range" class="prop-input" data-prop="blur" min="0" max="50">
+                    </div>
+                     <div class="prop-group">
+                        <label>HUE ROTATE</label>
+                        <input type="range" class="prop-input" data-prop="hue" min="0" max="360">
+                    </div>
+                    <div class="prop-group code-group">
+                        <label>EXPRESSION CODE (JS)</label>
+                        <textarea class="code-editor" placeholder="e.g. this.style.opacity = Math.random()"></textarea>
+                        <button class="run-code-btn">INJECT CODE</button>
+                    </div>
+                </template>
             </section>
         </main>
     </div>
