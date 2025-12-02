@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// --- 2. YOUR CONFIG (Hardcoded & Ready) ---
+// --- 2. YOUR REAL CONFIG (BAKED IN) ---
 const firebaseConfig = {
     apiKey: "AIzaSyB-fZTbZqNOJyPZhtnT8v0EiRb5XhCFzP0",
     authDomain: "gem-edit.firebaseapp.com",
@@ -14,73 +14,75 @@ const firebaseConfig = {
     measurementId: "G-BTCENT5HEK"
 };
 
-// --- 3. INITIALIZE APP ---
+// --- 3. INIT ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// --- 4. AUTHENTICATION ---
+// --- 4. AUTH & ROUTING ---
 const els = {
     auth: document.getElementById('auth-screen'),
-    app: document.getElementById('app'),
+    dash: document.getElementById('dashboard'),
+    editor: document.getElementById('editor'),
     loginBtn: document.getElementById('google-login-btn'),
     logoutBtn: document.getElementById('logout-btn'),
-    userName: document.getElementById('user-name'),
-    userPfp: document.getElementById('user-pfp')
+    dashUser: document.getElementById('dash-user-name'),
+    newProjectBtn: document.getElementById('new-project-btn'),
+    backToDashBtn: document.getElementById('back-to-dash-btn')
 };
 
 // Login
-if(els.loginBtn) {
+if (els.loginBtn) {
     els.loginBtn.addEventListener('click', () => {
         signInWithPopup(auth, provider).catch(err => alert("Login Error: " + err.message));
     });
 }
 
 // Logout
-if(els.logoutBtn) {
+if (els.logoutBtn) {
     els.logoutBtn.addEventListener('click', () => {
         signOut(auth).then(() => location.reload());
     });
 }
 
-// Auth State Listener
+// Auth Listener
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        // Show Dashboard
         if(els.auth) els.auth.classList.add('hidden');
-        if(els.app) els.app.classList.remove('hidden');
-        if(els.userName) els.userName.textContent = user.displayName;
-        if(els.userPfp) els.userPfp.src = user.photoURL;
+        if(els.dash) els.dash.classList.remove('hidden');
+        if(els.dashUser) els.dashUser.textContent = user.displayName;
     } else {
+        // Show Login
         if(els.auth) els.auth.classList.remove('hidden');
-        if(els.app) els.app.classList.add('hidden');
+        if(els.dash) els.dash.classList.add('hidden');
+        if(els.editor) els.editor.classList.add('hidden');
     }
 });
 
-// --- 5. TABS & URL IMPORTER ---
-document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => {
-        document.querySelectorAll('.tab, .tab-content').forEach(e => e.classList.remove('active'));
-        t.classList.add('active');
-        const target = document.getElementById(`tab-${t.dataset.tab}`);
-        if(target) target.classList.add('active');
-    });
-});
-
-const urlBtn = document.getElementById('url-add-btn');
-if(urlBtn) {
-    urlBtn.addEventListener('click', () => {
-        const url = document.getElementById('url-input').value;
-        if(url) createLayer(url, 'image');
+// Navigation
+if (els.newProjectBtn) {
+    els.newProjectBtn.addEventListener('click', () => {
+        els.dash.classList.add('hidden');
+        els.editor.classList.remove('hidden');
     });
 }
 
-// --- 6. LAYER SYSTEM (The Engine) ---
+if (els.backToDashBtn) {
+    els.backToDashBtn.addEventListener('click', () => {
+        els.editor.classList.add('hidden');
+        els.dash.classList.remove('hidden');
+    });
+}
+
+// --- 5. LAYER SYSTEM ---
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-upload');
 const stage = document.getElementById('canvas-stage');
+let selectedElement = null;
 
-if(dropZone && fileInput) {
+if (dropZone && fileInput) {
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         Array.from(e.target.files).forEach(f => {
@@ -90,175 +92,166 @@ if(dropZone && fileInput) {
     });
 }
 
-// Global function to create layers
-window.createLayer = function(url, type) {
-    if(!stage) return;
-    
-    const el = document.createElement(type === 'video' ? 'video' : 'img');
-    el.src = url;
-    el.className = 'layer-element';
-    
-    // Default Dimensions & Pos
-    el.style.width = '400px';
-    el.style.top = '100px'; 
-    el.style.left = '100px';
-    el.style.opacity = '1';
-    el.style.transition = 'opacity 0.2s, transform 0.1s'; // Smooth changes
+function createLayer(url, type) {
+    if (!stage) return;
 
-    // Video Auto-play
+    // Container
+    const container = document.createElement('div');
+    container.className = 'layer-element';
+    container.style.width = '400px';
+    container.style.top = '100px'; 
+    container.style.left = '100px';
+    
+    // Media Content
+    const content = document.createElement(type === 'video' ? 'video' : 'img');
+    content.src = url;
+    content.style.width = '100%'; 
+    content.style.height = '100%'; 
+    content.style.objectFit = 'contain'; // Better for resizing
+    
     if(type === 'video') { 
-        el.loop = true; 
-        el.muted = true; 
-        el.play(); 
+        content.loop = true; 
+        content.muted = true; 
+        content.play(); 
     }
+    
+    container.appendChild(content);
+    stage.appendChild(container);
 
-    // Add Interactions
-    makeDraggable(el);
-    el.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        selectLayer(el);
+    makeDraggable(container);
+    container.addEventListener('mousedown', (e) => { 
+        e.stopPropagation(); 
+        selectLayer(container); 
     });
+    
+    selectLayer(container);
+}
 
-    stage.appendChild(el);
-    selectLayer(el); 
-};
-
-// --- 7. PROPERTIES & EFFECTS ---
-let selectedElement = null;
-
+// --- 6. PROPERTIES & EFFECTS ENGINE ---
 function selectLayer(el) {
     selectedElement = el;
     document.querySelectorAll('.layer-element').forEach(e => e.classList.remove('selected'));
     el.classList.add('selected');
 
-    const content = document.getElementById('prop-panel-content');
+    const panel = document.getElementById('prop-panel-content');
     const template = document.getElementById('layer-props-template');
     
-    if(!content || !template) return;
+    if (!panel || !template) return;
 
-    content.innerHTML = '';
-    content.appendChild(template.content.cloneNode(true));
+    panel.innerHTML = '';
+    panel.appendChild(template.content.cloneNode(true));
 
-    // --- BIND SLIDERS ---
-    content.querySelectorAll('.prop-slider').forEach(slider => {
-        const prop = slider.dataset.prop;
+    const contentEl = el.querySelector('img, video'); 
+
+    // 1. Bind Number Inputs (W/H)
+    panel.querySelectorAll('.prop-num-input').forEach(input => {
+        const prop = input.dataset.prop;
+        // Get computed style initially
+        input.value = parseInt(el.style[prop] || el.getBoundingClientRect()[prop]); 
         
-        // Load initial values
+        input.addEventListener('input', (e) => {
+            el.style[prop] = e.target.value + 'px';
+        });
+    });
+
+    // 2. Bind Sliders
+    panel.querySelectorAll('.prop-slider').forEach(slider => {
+        const prop = slider.dataset.prop;
+        const filter = slider.dataset.filter;
+
+        // Init Values
+        if(prop === 'scale') slider.value = el.dataset.scale || 1;
         if(prop === 'opacity') slider.value = (el.style.opacity || 1) * 100;
-        if(prop === 'scale') {
-            const match = el.style.transform.match(/scale\(([^)]+)\)/);
-            slider.value = match ? match[1] : 1;
+        
+        // Init Filters
+        if(filter) {
+            slider.value = contentEl.dataset[filter] || (filter === 'contrast' || filter === 'brightness' ? 100 : 0);
         }
 
-        // Handle Input
         slider.addEventListener('input', (e) => {
             const val = e.target.value;
             // Update Text Display
             const display = e.target.previousElementSibling.querySelector('.val-display');
-            if(display) display.textContent = val + (prop === 'blur' || prop === 'pixelate' ? 'px' : '%');
+            if(display) display.innerText = val + (filter ? (filter === 'blur' ? 'px' : '%') : '');
             
-            applyEffects(el, prop, val);
+            if(prop) applyTransform(el, prop, val);
+            if(filter) applyFilter(contentEl, filter, val);
         });
     });
 
-    // --- BIND BUTTONS (Split, Fade) ---
-    content.querySelectorAll('.action-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const action = btn.dataset.action;
-            if(action === 'split') splitLayer(el);
-            if(action === 'fade-in') { 
-                el.style.opacity = '0'; 
-                setTimeout(() => el.style.opacity = '1', 50); // Trigger CSS transition
-            }
-            if(action === 'fade-out') el.style.opacity = '0';
-        });
+    // 3. Bind Actions
+    const splitBtn = panel.querySelector('[data-action="split"]');
+    if(splitBtn) splitBtn.addEventListener('click', () => splitLayer(el));
+    
+    const delBtn = panel.querySelector('[data-action="delete"]');
+    if(delBtn) delBtn.addEventListener('click', () => {
+        el.remove();
+        panel.innerHTML = '<p class="empty-state">Select a layer to edit</p>';
     });
 }
 
-function applyEffects(el, prop, val) {
-    // Save state to data attributes so we don't overwrite other filters
-    if(prop === 'blur') el.dataset.blur = val;
-    if(prop === 'pixelate') el.dataset.pixel = val;
-
-    // Retrieve current state (or default to 0)
-    const blurVal = el.dataset.blur || 0;
-    const pixVal = el.dataset.pixel || 0;
-
-    // 1. Apply Filters
-    let filterString = `blur(${blurVal}px)`;
-    
-    // Pixelate Logic (Using the SVG filter in index.html)
-    if(pixVal > 0) {
-        filterString += ` url(#pixelate)`;
-        // Update the global SVG filter radius to match slider
-        const svgFilter = document.querySelector('#pixelate feMorphology');
-        if(svgFilter) svgFilter.setAttribute('radius', pixVal);
-    }
-    
-    el.style.filter = filterString;
-
-    // 2. Apply Transforms/Opacity
+function applyTransform(el, prop, val) {
     if(prop === 'opacity') el.style.opacity = val / 100;
     if(prop === 'scale') {
-        // Maintain position, update scale
-        // Note: In a real app we'd need complex matrix math, here we simplify
-        const currentTransform = el.style.transform.replace(/scale\([^)]+\)/, ''); 
-        el.style.transform = `${currentTransform} scale(${val})`;
+        el.dataset.scale = val;
+        el.style.transform = `scale(${val})`;
     }
 }
 
-// --- 8. SPLICING TOOL ---
+function applyFilter(contentEl, filterName, val) {
+    // Save state
+    contentEl.dataset[filterName] = val;
+
+    // Build filter string
+    const filters = [
+        `blur(${contentEl.dataset.blur || 0}px)`,
+        `grayscale(${contentEl.dataset.grayscale || 0}%)`,
+        `sepia(${contentEl.dataset.sepia || 0}%)`,
+        `invert(${contentEl.dataset.invert || 0}%)`,
+        `contrast(${contentEl.dataset.contrast || 100}%)`
+    ];
+    
+    contentEl.style.filter = filters.join(' ');
+}
+
+// SPLICING
 function splitLayer(el) {
     const rect = el.getBoundingClientRect();
-    const parentRect = stage.getBoundingClientRect();
-    
-    // Calculate width to cut
     const currentWidth = rect.width;
     const newWidth = currentWidth / 2;
     
-    el.style.width = newWidth + 'px'; // Shrink original
+    el.style.width = newWidth + 'px';
     
-    // Create the "Second Half"
     const clone = el.cloneNode(true);
-    
-    // Calculate relative position for the clone
-    // We need to parse 'left' style which is typically "100px"
     const currentLeft = parseInt(el.style.left || 0);
-    const newLeft = currentLeft + newWidth + 20; // +20px gap
     
-    clone.style.left = newLeft + 'px';
+    clone.style.left = (currentLeft + newWidth + 20) + 'px';
     clone.style.width = newWidth + 'px';
     
-    // Re-bind events to clone
-    makeDraggable(clone);
-    clone.addEventListener('mousedown', (e) => { 
-        e.stopPropagation(); 
-        selectLayer(clone); 
-    });
-    
+    // Make clone interactive
     stage.appendChild(clone);
-    // Visual feedback
-    clone.style.outline = "2px solid white";
-    setTimeout(() => clone.style.outline = "none", 200);
+    makeDraggable(clone);
+    clone.addEventListener('mousedown', (e) => { e.stopPropagation(); selectLayer(clone); });
+    
+    selectLayer(clone);
 }
 
-// --- 9. SCRUBBER & TIMELINE ---
+// --- 7. SCRUBBER ---
 const scrubber = document.getElementById('scrubber');
 const timeDisplay = document.getElementById('time-display');
-let isPlaying = false;
+let isPlaying = false; 
 let playInterval;
 
 const playBtn = document.getElementById('play-btn');
 const stopBtn = document.getElementById('stop-btn');
 
-if(playBtn && stopBtn && scrubber) {
+if (playBtn && stopBtn && scrubber) {
     playBtn.addEventListener('click', () => {
         if(isPlaying) return;
         isPlaying = true;
-        // Simple loop to move scrubber
         playInterval = setInterval(() => {
             let val = parseInt(scrubber.value);
-            if(val >= 100) val = 0; // Loop
+            if(val >= 100) val = 0;
             scrubber.value = val + 1;
             updateTime(scrubber.value);
         }, 100); 
@@ -273,27 +266,31 @@ if(playBtn && stopBtn && scrubber) {
 }
 
 function updateTime(val) {
-    // Fake time calculation: 0-100 scrub = 0-60 seconds
+    // Visual playhead
+    const track = document.querySelector('.timeline-track-container');
+    if(track) track.style.setProperty('--seek-pos', val + '%');
+    
+    // Time Text
     const totalSeconds = Math.floor((val / 100) * 60);
     const m = Math.floor(totalSeconds / 60);
     const s = totalSeconds % 60;
     if(timeDisplay) timeDisplay.textContent = `00:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
 }
 
-// --- 10. DRAGGABLE PHYSICS ---
+// --- 8. PHYSICS ---
 function makeDraggable(element) {
-    let isDragging = false;
+    let isDragging = false; 
     let startX, startY, initialLeft, initialTop;
-
+    
     element.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX;
+        isDragging = true; 
+        startX = e.clientX; 
         startY = e.clientY;
-        initialLeft = element.offsetLeft;
+        initialLeft = element.offsetLeft; 
         initialTop = element.offsetTop;
         element.style.cursor = 'grabbing';
     });
-
+    
     window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const dx = e.clientX - startX;
@@ -301,9 +298,9 @@ function makeDraggable(element) {
         element.style.left = `${initialLeft + dx}px`;
         element.style.top = `${initialTop + dy}px`;
     });
-
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
-        element.style.cursor = 'grab';
+    
+    window.addEventListener('mouseup', () => { 
+        isDragging = false; 
+        element.style.cursor = 'grab'; 
     });
 }
