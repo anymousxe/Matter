@@ -1,7 +1,7 @@
 // --- 1. SUPABASE CONFIGURATION ---
 // We will fill these in after you make the Supabase account
-const SUPABASE_URL = 'PASTE_URL_HERE';
-const SUPABASE_KEY = 'PASTE_KEY_HERE';
+const SUPABASE_URL = 'https://zloyqpcbipxwighqswom.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpsb3lxcGNiaXB4d2lnaHFzd29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NzEzMDUsImV4cCI6MjA4MDI0NzMwNX0.U8iL4atEScrXhjnI3Qw1vV8i9aIKDrNjh1SxPgbGZic';
 
 // Initialize Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
