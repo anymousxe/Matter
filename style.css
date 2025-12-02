@@ -1,187 +1,159 @@
-:root {
-    --bg-dark: #09090b;
-    --bg-panel: #121214;
-    --border: #27272a;
-    --accent: #6366f1; /* Indigo */
-    --text-main: #e4e4e7;
-    --text-dim: #71717a;
-    --font: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATTER // BETA</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/2/2.2.1/iconify.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-* { box-sizing: border-box; user-select: none; outline: none; }
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h1>MATTER <span class="accent-text">BETA</span></h1>
+            <p>VISUAL SYNTHESIS ENGINE</p>
+            <button id="google-login-btn">
+                <span class="iconify" data-icon="ph:google-logo-bold"></span>
+                ENTER SYSTEM
+            </button>
+        </div>
+    </div>
 
-body {
-    margin: 0;
-    background: var(--bg-dark);
-    color: var(--text-main);
-    font-family: var(--font);
-    height: 100vh;
-    overflow: hidden; /* Fixes "stuff going off screen" */
-}
+    <div id="dashboard" class="hidden">
+        <header>
+            <div class="brand">MATTER // BETA</div>
+            <div class="header-right">
+                <span id="dash-user-name">User</span>
+                <button id="logout-btn">LOGOUT</button>
+            </div>
+        </header>
+        <div class="dash-content">
+            <div id="new-project-btn" class="project-card new">
+                <span class="iconify" data-icon="ph:plus"></span>
+                NEW COMPOSITION
+            </div>
+            <div class="project-card">Demo Project 1</div>
+            <div class="project-card">Music Video v3</div>
+        </div>
+    </div>
 
-/* UTILS */
-.hidden { display: none !important; }
-button { cursor: pointer; border: none; font-family: var(--font); transition: 0.1s; }
+    <div id="editor" class="hidden">
+        
+        <header>
+            <div class="brand">
+                <button id="back-to-dash-btn" class="icon-only"><span class="iconify" data-icon="ph:arrow-left-bold"></span></button>
+                MATTER // BETA
+            </div>
+            <div class="header-center">
+                <span id="project-name">Untitled Composition</span>
+            </div>
+            <div class="header-right">
+                 <button id="save-btn" class="accent-btn"><span class="iconify" data-icon="ph:floppy-disk-fill"></span> SAVE</button>
+            </div>
+        </header>
 
-/* AUTH SCREEN */
-#auth-screen {
-    position: fixed; inset: 0;
-    background: #000;
-    display: flex; justify-content: center; align-items: center;
-    z-index: 999;
-}
-.auth-box {
-    text-align: center;
-    border: 1px solid var(--border);
-    padding: 60px;
-    background: var(--bg-panel);
-    border-radius: 12px;
-}
-#google-login-btn {
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: white; color: black;
-    font-weight: 800; border-radius: 6px;
-    display: flex; align-items: center; gap: 10px; margin-inline: auto;
-}
+        <main>
+            <section class="panel left">
+                <div class="panel-header">ASSETS</div>
+                <div id="drop-zone">
+                    <span class="iconify" data-icon="ph:plus-circle" style="font-size: 32px;"></span>
+                    <p>Import Media</p>
+                    <input type="file" id="file-upload" multiple hidden>
+                </div>
+                <div class="file-list-help">Supported: IMG, MP4</div>
+            </section>
 
-/* APP LAYOUT */
-#app { display: flex; flex-direction: column; height: 100%; }
+            <section class="center-stage">
+                <div id="canvas-wrapper">
+                    <div id="canvas-stage">
+                        </div>
+                </div>
 
-/* HEADER */
-header {
-    height: 54px;
-    background: var(--bg-panel);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px;
-}
-.brand { font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
-.badge { font-size: 0.6rem; background: var(--accent); padding: 2px 6px; border-radius: 4px; }
-#project-name { font-family: var(--font-mono); color: var(--text-dim); font-size: 0.9rem; }
-.header-right { display: flex; gap: 15px; align-items: center; }
-.user-pill { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; background: #1f1f22; padding: 4px 10px 4px 4px; border-radius: 50px; }
-#user-pfp { width: 24px; height: 24px; border-radius: 50%; }
-.icon-only { background: transparent; color: var(--text-dim); padding: 5px; font-size: 1.2rem; }
-.icon-only:hover { color: #f44; }
+                <div class="timeline-bar">
+                    <div class="transport">
+                        <button id="play-btn"><span class="iconify" data-icon="ph:play-fill"></span></button>
+                        <button id="stop-btn"><span class="iconify" data-icon="ph:stop-fill"></span></button>
+                        <span id="time-display">00:00:00</span>
+                    </div>
+                    <div class="timeline-track-container">
+                        <input type="range" id="scrubber" min="0" max="100" value="0">
+                        <div class="track-visuals"></div> </div>
+                </div>
+            </section>
 
-/* MAIN GRID */
-main {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 320px 1fr 300px; /* Fixed Panel widths */
-    overflow: hidden;
-}
+            <section class="panel right">
+                <div class="panel-header">PROPERTIES</div>
+                
+                <div id="prop-panel-content">
+                    <p class="empty-state">Select a layer to edit</p>
+                </div>
 
-.panel { background: var(--bg-panel); display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-.panel.right { border-right: none; border-left: 1px solid var(--border); }
-.panel.left { border-right: 1px solid var(--border); }
+                <template id="layer-props-template">
+                    
+                    <div class="prop-section">
+                        <label>TOOLS</label>
+                        <div class="btn-grid">
+                            <button class="action-btn" data-action="split">
+                                <span class="iconify" data-icon="ph:scissors"></span> Split
+                            </button>
+                            <button class="action-btn danger" data-action="delete">
+                                <span class="iconify" data-icon="ph:trash"></span> Delete
+                            </button>
+                        </div>
+                    </div>
 
-/* TABS */
-.tabs { display: flex; border-bottom: 1px solid var(--border); }
-.tab { flex: 1; background: transparent; color: var(--text-dim); padding: 12px; font-weight: 600; font-size: 0.8rem; border-bottom: 2px solid transparent; }
-.tab.active { color: white; border-bottom-color: var(--accent); }
-.tab-content { padding: 20px; flex: 1; overflow-y: auto; }
-.tab-content.no-pad { padding: 0; display: flex; flex-direction: column; }
-.tab-content:not(.active) { display: none; }
+                    <div class="prop-section">
+                         <label>TRANSFORM</label>
+                        <div class="input-group-row">
+                             <div>
+                                <label class="sub-label">W</label>
+                                <input type="number" class="prop-num-input" data-prop="width">
+                             </div>
+                             <div>
+                                <label class="sub-label">H</label>
+                                <input type="number" class="prop-num-input" data-prop="height">
+                             </div>
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-label"><span>SCALE</span> <span class="val-display">1.0</span></div>
+                            <input type="range" class="prop-slider" data-prop="scale" min="0.1" max="3" step="0.1" value="1">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>OPACITY</span> <span class="val-display">100%</span></div>
+                            <input type="range" class="prop-slider" data-prop="opacity" min="0" max="100" value="100">
+                        </div>
+                    </div>
 
-/* IMPORT ZONE */
-#drop-zone {
-    border: 2px dashed var(--border);
-    border-radius: 8px;
-    height: 150px;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    color: var(--text-dim);
-    transition: 0.2s;
-    cursor: pointer;
-}
-#drop-zone:hover { border-color: var(--accent); color: var(--accent); background: #1e1e24; }
-.file-list-help { font-size: 0.7rem; color: #555; text-align: center; margin-top: 10px; }
+                    <div class="prop-section">
+                        <label>EFFECTS</label>
+                        <div class="slider-group">
+                            <div class="slider-label"><span>BLUR</span> <span class="val-display">0px</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="blur" min="0" max="20" step="1" value="0">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-label"><span>GRAYSCALE</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="grayscale" min="0" max="100" step="1" value="0">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-label"><span>SEPIA</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="sepia" min="0" max="100" step="1" value="0">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>INVERT</span> <span class="val-display">0%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="invert" min="0" max="100" step="1" value="0">
+                        </div>
+                         <div class="slider-group">
+                            <div class="slider-label"><span>CONTRAST</span> <span class="val-display">100%</span></div>
+                            <input type="range" class="prop-slider filter-slider" data-filter="contrast" min="0" max="200" step="1" value="100">
+                        </div>
+                    </div>
+                </template>
+            </section>
+        </main>
+    </div>
 
-/* IFRAME / STOCK */
-.iframe-container { flex: 1; position: relative; background: white; }
-iframe { width: 100%; height: 100%; border: none; }
-.iframe-overlay-hint { 
-    position: absolute; bottom: 0; left: 0; width: 100%; 
-    background: rgba(0,0,0,0.8); color: white; 
-    font-size: 0.7rem; padding: 5px; text-align: center; pointer-events: none;
-}
-.url-importer { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 5px; }
-#url-input { flex: 1; background: #000; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 4px; }
-#url-add-btn { background: var(--accent); color: white; padding: 0 12px; border-radius: 4px; }
-
-/* CENTER STAGE */
-.center-stage {
-    background: #000;
-    display: flex; flex-direction: column;
-    position: relative;
-    overflow: hidden;
-}
-.viewport-controls {
-    position: absolute; top: 15px; left: 20px; right: 20px;
-    display: flex; justify-content: space-between;
-    z-index: 10; pointer-events: none;
-}
-.viewport-controls button { pointer-events: auto; }
-.res-tag { font-family: var(--font-mono); font-size: 0.7rem; color: #555; }
-.accent-text { color: var(--accent); background: rgba(99, 102, 241, 0.1); padding: 6px 12px; border-radius: 4px; font-weight: bold; }
-
-#canvas-wrapper {
-    flex: 1;
-    display: flex; justify-content: center; align-items: center;
-    background-image: radial-gradient(#222 1px, transparent 1px);
-    background-size: 24px 24px;
-}
-#canvas-stage {
-    width: 1280px; height: 720px;
-    background: #000;
-    position: relative;
-    transform: scale(0.65);
-    box-shadow: 0 0 100px rgba(0,0,0,0.5);
-    border: 1px solid #333;
-    overflow: hidden;
-}
-
-/* LAYERS */
-.layer-element { position: absolute; cursor: grab; }
-.layer-element.selected { outline: 2px solid var(--accent); z-index: 99; }
-.layer-element:active { cursor: grabbing; }
-
-/* TIMELINE */
-.timeline-bar {
-    height: 50px;
-    background: var(--bg-panel);
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center;
-    padding: 0 20px; gap: 15px;
-}
-.transport { display: flex; align-items: center; gap: 5px; }
-.transport button { background: transparent; color: white; padding: 5px; border-radius: 4px; }
-.transport button:hover { background: #333; }
-#time-display { font-family: var(--font-mono); font-size: 0.8rem; margin-left: 10px; color: var(--accent); }
-#scrubber { flex: 1; accent-color: var(--accent); height: 4px; }
-
-/* PROPERTIES */
-.panel-header { padding: 15px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #555; border-bottom: 1px solid var(--border); }
-.empty-state { padding: 20px; text-align: center; color: #444; font-size: 0.9rem; }
-.prop-section { padding: 15px; border-bottom: 1px solid var(--border); }
-.prop-section label { display: block; font-size: 0.7rem; font-weight: 700; color: #666; margin-bottom: 10px; }
-
-/* Sliders */
-.slider-group { margin-bottom: 12px; }
-.slider-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #aaa; margin-bottom: 5px; }
-.prop-slider { width: 100%; accent-color: white; background: #222; height: 4px; border-radius: 2px; }
-.val-display { font-family: var(--font-mono); color: var(--accent); }
-
-/* Buttons */
-.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.action-btn { 
-    background: #1f1f22; color: white; 
-    padding: 10px; border-radius: 6px; 
-    font-size: 0.8rem; font-weight: 600;
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-}
-.action-btn:hover { background: white; color: black; border-color: white; }
+    <script type="module" src="main.js"></script>
+</body>
+</html>
